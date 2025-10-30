@@ -6,6 +6,7 @@ skip_list:
 exclude_paths:
   - .github/
   - molecule/
+  - .venv/
 
 warn_list:
   - experimental

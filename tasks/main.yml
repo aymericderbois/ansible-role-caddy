@@ -7,7 +7,9 @@
 
 - name: Ensure Caddy repository is added
   ansible.builtin.apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/caddy-stable-archive-keyring.asc] https://dl.cloudsmith.io/public/caddy/stable/deb/debian any-version main"
+    repo: >-
+      deb [signed-by=/etc/apt/keyrings/caddy-stable-archive-keyring.asc]
+      https://dl.cloudsmith.io/public/caddy/stable/deb/debian any-version main
     state: present
     filename: caddy
 
@@ -56,9 +58,11 @@
   when: caddy_sites_templates | length > 0
 
 - name: Validate Caddy configuration
-  ansible.builtin.command: caddy validate --config {{ caddy_config_dir }}/Caddyfile --adapter caddyfile
+  ansible.builtin.command: >-
+    caddy validate --config {{ caddy_config_dir }}/Caddyfile --adapter caddyfile
   register: caddy_validate
   changed_when: false
+  become: true
   become_user: caddy
 
 - name: Ensure Caddy service is enabled and started
