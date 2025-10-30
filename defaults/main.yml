@@ -2,6 +2,7 @@
 caddy_config_dir: "/etc/caddy"
 caddy_sites_dir: "/etc/caddy/sites-enabled"
 
-caddy_sites_templates: []  # [{"name": "example", "template": "example.caddy.j2"}]
+caddy_sites_templates: []
+# [{"name": "example", "template": "example.caddy.j2"}]
 
 caddy_acme_email: ""  # Email pour Let's Encrypt
