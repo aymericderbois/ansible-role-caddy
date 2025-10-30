@@ -1,0 +1,68 @@
+---
+- name: Ensure Caddy GPG key is installed
+  ansible.builtin.get_url:
+    url: https://dl.cloudsmith.io/public/caddy/stable/gpg.key
+    dest: /etc/apt/keyrings/caddy-stable-archive-keyring.asc
+    mode: '0644'
+
+- name: Ensure Caddy repository is added
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/caddy-stable-archive-keyring.asc] https://dl.cloudsmith.io/public/caddy/stable/deb/debian any-version main"
+    state: present
+    filename: caddy
+
+- name: Ensure Caddy is installed
+  ansible.builtin.apt:
+    name: caddy
+    state: present
+    update_cache: true
+
+- name: Ensure Caddy sites-enabled directory exists
+  ansible.builtin.file:
+    path: "{{ caddy_sites_dir }}"
+    state: directory
+    mode: '0755'
+    owner: caddy
+    group: caddy
+
+- name: Ensure Caddy log directory exists
+  ansible.builtin.file:
+    path: /var/log/caddy
+    state: directory
+    mode: '0755'
+    owner: caddy
+    group: caddy
+
+- name: Ensure Caddy main configuration file
+  ansible.builtin.template:
+    src: Caddyfile.j2
+    dest: "{{ caddy_config_dir }}/Caddyfile"
+    mode: '0644'
+    owner: caddy
+    group: caddy
+    backup: true
+  notify: Reload Caddy
+
+- name: Ensure Caddy site configurations (template)
+  ansible.builtin.template:
+    src: "{{ item.template }}"
+    dest: "{{ caddy_sites_dir }}/{{ item.name }}.caddy"
+    mode: '0644'
+    owner: caddy
+    group: caddy
+    backup: true
+  loop: "{{ caddy_sites_templates }}"
+  notify: Reload Caddy
+  when: caddy_sites_templates | length > 0
+
+- name: Validate Caddy configuration
+  ansible.builtin.command: caddy validate --config {{ caddy_config_dir }}/Caddyfile --adapter caddyfile
+  register: caddy_validate
+  changed_when: false
+  become_user: caddy
+
+- name: Ensure Caddy service is enabled and started
+  ansible.builtin.systemd:
+    name: caddy
+    enabled: true
+    state: started

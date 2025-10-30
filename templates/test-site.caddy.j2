@@ -1,0 +1,8 @@
+# Configuration de test pour Molecule
+:8080 {
+    respond "Hello from Caddy test!"
+    
+    log {
+        output file /var/log/caddy/test-site.log
+    }
+}

@@ -1,0 +1,51 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Check if Caddy is installed
+      ansible.builtin.command: caddy version
+      changed_when: false
+      register: caddy_version
+
+    - name: Display Caddy version
+      ansible.builtin.debug:
+        var: caddy_version.stdout
+
+    - name: Check if Caddy service is running
+      ansible.builtin.systemd:
+        name: caddy
+      register: caddy_service
+
+    - name: Assert Caddy service is running
+      ansible.builtin.assert:
+        that:
+          - caddy_service.status.ActiveState == "active"
+        fail_msg: "Caddy service is not running"
+        success_msg: "Caddy service is running"
+
+    - name: Check if Caddyfile exists
+      ansible.builtin.stat:
+        path: /etc/caddy/Caddyfile
+      register: caddyfile
+
+    - name: Assert Caddyfile exists
+      ansible.builtin.assert:
+        that:
+          - caddyfile.stat.exists
+        fail_msg: "Caddyfile does not exist"
+        success_msg: "Caddyfile exists"
+
+    - name: Check if sites-enabled directory exists
+      ansible.builtin.stat:
+        path: /etc/caddy/sites-enabled
+      register: sites_dir
+
+    - name: Assert sites-enabled directory exists
+      ansible.builtin.assert:
+        that:
+          - sites_dir.stat.exists
+          - sites_dir.stat.isdir
+        fail_msg: "sites-enabled directory does not exist"
+        success_msg: "sites-enabled directory exists"

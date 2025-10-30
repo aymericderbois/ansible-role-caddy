@@ -1,0 +1,65 @@
+---
+name: CI
+
+"on":
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run ansible-lint
+        run: uv run ansible-lint
+
+      - name: Run yamllint
+        run: uv run yamllint .
+
+  test:
+    name: Molecule Test
+    runs-on: ubuntu-latest
+    needs: lint
+
+    strategy:
+      matrix:
+        distro:
+          - debian13
+          - debian12
+          - debian11
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run Molecule test
+        run: uv run molecule test
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'

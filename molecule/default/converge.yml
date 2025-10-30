@@ -1,0 +1,15 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+
+  vars:
+    caddy_acme_email: "test@example.com"
+    caddy_sites_templates:
+      - name: "test-site"
+        template: "test-site.caddy.j2"
+
+  tasks:
+    - name: Include role
+      ansible.builtin.include_role:
+        name: ansible-role-caddy

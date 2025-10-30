@@ -1,0 +1,11 @@
+---
+skip_list:
+  - yaml[line-length]
+  - name[casing]
+
+exclude_paths:
+  - .github/
+  - molecule/
+
+warn_list:
+  - experimental

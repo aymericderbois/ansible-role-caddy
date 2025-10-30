@@ -1,0 +1,8 @@
+{
+{% if caddy_acme_email %}
+	email {{ caddy_acme_email }}
+{% endif %}
+}
+
+# Import des configurations de sites
+import {{ caddy_sites_dir }}/*.caddy
