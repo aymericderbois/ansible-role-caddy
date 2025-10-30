@@ -1,12 +1,5 @@
 ---
-skip_list:
-  - yaml[line-length]
-  - name[casing]
-
 exclude_paths:
   - .github/
   - molecule/
   - .venv/
-
-warn_list:
-  - experimental
