@@ -3,3 +3,8 @@ exclude_paths:
   - .github/
   - molecule/
   - .venv/
+
+profile: production
+
+warn_list:
+  - experimental
