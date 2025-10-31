@@ -1,17 +1,42 @@
 ---
+- name: Ensure /etc/apt/keyrings directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
 - name: Ensure Caddy GPG key is installed
   ansible.builtin.get_url:
     url: https://dl.cloudsmith.io/public/caddy/stable/gpg.key
     dest: /etc/apt/keyrings/caddy-stable-archive-keyring.asc
     mode: '0644'
 
-- name: Ensure Caddy repository is added
+- name: Ensure python3-debian is installed (required for deb822_repository)
+  ansible.builtin.apt:
+    name: python3-debian
+    state: present
+    update_cache: true
+  when: ansible_distribution_major_version | int >= 12
+
+- name: Ensure Caddy repository is added (deb822 format for modern systems)
+  ansible.builtin.deb822_repository:
+    name: caddy
+    types: [deb]
+    uris: https://dl.cloudsmith.io/public/caddy/stable/deb/debian
+    suites: any-version
+    components: [main]
+    signed_by: /etc/apt/keyrings/caddy-stable-archive-keyring.asc
+    state: present
+  when: ansible_distribution_major_version | int >= 12
+
+- name: Ensure Caddy repository is added (legacy format for older systems)
   ansible.builtin.apt_repository:
     repo: >-
       deb [signed-by=/etc/apt/keyrings/caddy-stable-archive-keyring.asc]
       https://dl.cloudsmith.io/public/caddy/stable/deb/debian any-version main
     state: present
     filename: caddy
+  when: ansible_distribution_major_version | int < 12
 
 - name: Ensure Caddy is installed
   ansible.builtin.apt:
